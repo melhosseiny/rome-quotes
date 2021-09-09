@@ -126,32 +126,17 @@ const MEDIA_TYPES = {
   ".zip": "application/zip",
 };
 
-const PATHNAME_PREFIX = "/melhosseiny/quotes/main";
 const ext = (pathname) => `.${pathname.split(".").pop()}`;
 const contentType = (pathname) => MEDIA_TYPES[ext(pathname)];
 
 addEventListener("fetch", async (event) => {
-  const { pathname, searchParams } = new URL(event.request.url);
-  console.log(event.request.url);
-  console.log(PATHNAME_PREFIX, pathname, import.meta.url);
+  const { pathname } = new URL(event.request.url);
 
-  let url = import.meta.url.startsWith("file")
-    ? new URL(pathname, "http://localhost:4508")
-    : new URL(PATHNAME_PREFIX + pathname, import.meta.url);
-
-  const res = await fetch(url, {
-    headers: {
-      "Authorization": `token ${Deno.env.get("GITHUB_ACCESS_TOKEN")}`,
-    },
-  });
-
-  console.log(res);
-
-  let response_body = res.body;
+  let response_body;
 
   if (pathname.endsWith("index.json")) {
-    const index = await res.json();
-    response_body = JSON.stringify(index);
+    const index = await Deno.readFile("./index.json");
+    response_body = index;
   }
 
   event.respondWith(new Response(response_body, {
